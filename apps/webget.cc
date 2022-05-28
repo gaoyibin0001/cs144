@@ -3,12 +3,31 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
+// #include <stdio.h>
 
 using namespace std;
 
 void get_URL(const string &host, const string &path) {
     // Your code here.
-
+    TCPSocket sock;
+    // const string service = "http";
+    const Address host_address = Address(host, "http");
+    stringstream writeStream;
+    writeStream << "GET " <<  path << " HTTP/1.1 \r\n";
+    writeStream << "Host: " << host << " \r\n";
+    writeStream << "Connection: close \r\n";
+    writeStream << "\r\n";
+    sock.connect(host_address);
+    string ret;
+   
+    sock.write(writeStream.str());
+    cout << writeStream.str() << endl;
+    while (!sock.eof()) {
+      ret = sock.read(1000);
+      cout << ret << endl;
+    }
+    sock.close();
     // You will need to connect to the "http" service on
     // the computer whose name is in the "host" string,
     // then request the URL path given in the "path" string.
@@ -17,8 +36,8 @@ void get_URL(const string &host, const string &path) {
     // (not just one call to read() -- everything) until you reach
     // the "eof" (end of file).
 
-    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
-    cerr << "Warning: get_URL() has not been implemented yet.\n";
+    // cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
+    // cerr << "Warning: get_URL() has not been implemented yet.\n";
 }
 
 int main(int argc, char *argv[]) {
