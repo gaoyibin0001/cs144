@@ -14,18 +14,17 @@ void get_URL(const string &host, const string &path) {
     // const string service = "http";
     const Address host_address = Address(host, "http");
     stringstream writeStream;
-    writeStream << "GET " <<  path << " HTTP/1.1 \r\n";
-    writeStream << "Host: " << host << " \r\n";
-    writeStream << "Connection: close \r\n";
+    writeStream << "GET " <<  path << " HTTP/1.1\r\n";
+    writeStream << "Host: " << host << "\r\n";
+    writeStream << "Connection: close\r\n";
     writeStream << "\r\n";
     sock.connect(host_address);
     string ret;
    
     sock.write(writeStream.str());
-    cout << writeStream.str() << endl;
     while (!sock.eof()) {
       ret = sock.read(1000);
-      cout << ret << endl;
+      cout << ret;
     }
     sock.close();
     // You will need to connect to the "http" service on
