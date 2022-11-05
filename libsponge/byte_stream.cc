@@ -17,14 +17,23 @@ using namespace std;
 ByteStream::ByteStream(const size_t capacity) { cap = capacity; }
 
 size_t ByteStream::write(const string &data) {
-    size_t written_num = 0;
-    // printf("%d, %d\n", cap, inner_store.size());
-    while ((cap - inner_store.size()) > 0 && written_num < data.size()) {
-        // while ((cap - inner_store.size()) > 0) {
+    size_t written_num = data.size();
+    size_t left_size = cap - inner_store.size();
 
-        inner_store.push_back(data.at(written_num));
-        written_num++;
+    if (left_size < data.size()) {
+        written_num = left_size;
     }
+
+    inner_store.append(data, 0, written_num);
+    // printf("%d, %d\n", cap, inner_store.size());
+
+    // size_t written_num = 0;
+    // while ((cap - inner_store.size()) > 0 && written_num < data.size()) {
+    //     // while ((cap - inner_store.size()) > 0) {
+    //     // todo poor performance
+    //     inner_store.push_back(data.at(written_num));
+    //     written_num++;
+    // }
     bytes_written_num += written_num;
     return written_num;
 }
