@@ -25,21 +25,26 @@ StreamReassembler::StreamReassembler(const size_t capacity) : _output(ByteStream
 //! possibly out-of-order, from the logical stream, and assembles any newly
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
+    string data_written = data;
     if (((_output.buffer_size() + _un_assembled_bytes + data.size()) > _capacity)) {
-        return;
+          data_written = data.substr(0, _capacity-(_output.buffer_size() + _un_assembled_bytes)); 
     }
     // string un_a_value;
+    if (eof) {
+        // _got_end_index = true;
+        _end_index = index;
+    } 
 
     if (index == _current_index) {
-        _output.write(data);
+        _output.write(data_written);
         if (_current_index == _end_index) _output.end_input();
-        _current_index += 1;
+        _current_index += data_written.size();
         while(1){
             auto un_a_value = _un_assembled.find(_current_index); 
             if (un_a_value != _un_assembled.end()) {
               _output.write(un_a_value->second);
               if (un_a_value->first == _end_index) _output.end_input();
-              _current_index += 1;
+              _current_index += un_a_value->second.size();
               _un_assembled.erase(un_a_value);
               _un_assembled_bytes -= un_a_value->second.size();
             } else{
@@ -48,16 +53,13 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         }
     } else {
         if (_un_assembled.count(index) == 0) {
-           _un_assembled.insert({index, data});
-           _un_assembled_bytes += data.size();
+           _un_assembled.insert({index, data_written});
+           _un_assembled_bytes += data_written.size();
         }
         
     }
 
-    if (eof) {
-        // _got_end_index = true;
-        _end_index = index;
-    } 
+    
 
     // _push_string_action(data, index, eof);
 }
