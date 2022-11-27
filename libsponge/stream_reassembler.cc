@@ -40,39 +40,49 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
                 return;
               }
 
+    // 是否要覆盖过去的数据？现在覆盖！！！
     if ((index <= _current_index) && ((index+data.size())> _current_index)) {
         data_written = data.substr((_current_index-index), data_written_allow_num);
         _output.write(data_written);
         if (eof) _output.end_input();
         _current_index += data_written.size();
-        while(1){
-            auto un_a_value = _un_assembled.upper_bound(_current_index); 
-            if (un_a_value != _un_assembled.begin()) {
-              --un_a_value;
+        auto un_a_value = _un_assembled.upper_bound(_current_index); 
+        if (un_a_value != _un_assembled.begin()) {
+          --un_a_value;
+          if ((un_a_value->first + un_a_value->second.size()) > _current_index) {
               data_written = un_a_value->second.substr(_current_index-un_a_value->first);
               _output.write(data_written);
-              
-              _current_index += data_written.size();
-              if (_current_index == _end_index) {
-                _output.end_input();
-                return;
-              }
+          
+            _current_index += data_written.size();
+            if (_current_index == _end_index) {
+              _output.end_input();
+              return;
+          }
+          }
+          
 
-              while(un_a_value != _un_assembled.begin()) {
-                _un_assembled.erase(un_a_value);
-                _un_assembled_bytes -= un_a_value->second.size();
-                --un_a_value;
-              }
-              _un_assembled.erase(un_a_value);
-              _un_assembled_bytes -= un_a_value->second.size();
+          while(un_a_value != _un_assembled.begin()) {
+            _un_assembled.erase(un_a_value);
+            _un_assembled_bytes -= un_a_value->second.size();
+            --un_a_value;
+          }
+          _un_assembled.erase(un_a_value);
+          _un_assembled_bytes -= un_a_value->second.size();
 
-              
-            } else{
-                break;
-            }
-        }
+        }  
     } else {
         // todo merge data list
+        auto lower_value = _un_assembled.lower_bound(index); 
+            if (lower_value != _un_assembled.begin()) {
+              --lower_value;
+              if ((lower_value->first + lower_value->second.size()) >= index){
+                lower_value->second += data;
+              }
+              
+            }
+              
+
+
         data_written = data.substr(0, data_written_allow_num);
         if (_un_assembled.count(index) == 0) {
            _un_assembled.insert({index, data_written});
