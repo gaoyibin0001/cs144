@@ -5,22 +5,29 @@
 
 #include <cstdint>
 #include <string>
-#include <map>
-
+#include <vector>
+using namespace std;
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
-    size_t _current_index = 0;
-    std::map<size_t, std::string> _un_assembled = {};
-    int _un_assembled_bytes = 0;
+    // current valid continious stream end index
+    uint64_t current_index_ = 0;
+    // std::map<size_t, std::string> un_assembled_;
+    vector<string> un_assembled_ = vector<string>();
+    vector<pair<uint64_t, uint64_t>> un_index_ = vector<pair<uint64_t, uint64_t>>();
+    int un_assembled_bytes_ = 0;
     // void _push_string_action(const std::string &data, const uint64_t index, const bool eof);
 
     // bool _got_end_index = false;
-    size_t _end_index = -1;
+    size_t end_index_ = -1;
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
+
+    void push_unassembled_substring_(const std::string &data, const uint64_t begin_index, const uint64_t end_index);
+    void pop_unassembled_to_output_();
+    void update_end_eof_();
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
